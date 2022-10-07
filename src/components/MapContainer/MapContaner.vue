@@ -15,6 +15,7 @@
         autoOptions: {
         input: ''
         },
+        searchPlaceInput:'',
         auto: null,
         placeSearch:null
 
@@ -62,8 +63,17 @@
     created() {
     bus.$on('shareUserInput', val => {
       this.autoOptions.input = val.inputId
+      this.searchPlaceInput = val.userInput   
     })
   },
+  watch: {
+    searchPlaceInput(newValue) {
+      if (newValue != null) {
+        this.placeSearch.search(newValue)
+      }
+    }
+  }
+
 
   }
   </script>

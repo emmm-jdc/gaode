@@ -9,6 +9,9 @@
         <div id="heatMap_warp">
           <heatMapSearchBox></heatMapSearchBox>
         </div>
+          <div id="info_window_warp">
+            <infoWindow></infoWindow>
+          </div>
         <div id="shadow"></div>
     </div>
 
@@ -18,8 +21,9 @@
 import MapContaner from '@/components/MapContainer/MapContaner.vue';
 import Search from "@/components/Search/Search.vue"
 import heatMapSearchBox from '@/components/heatMapSearchBox/heatMapSearchBox.vue';
+import infoWindow from '../components/infoWindow/infoWindow.vue';
     export default {
-    components: { MapContaner , Search,heatMapSearchBox}
+    components: { MapContaner , Search,heatMapSearchBox,infoWindow}
 }
   </script>
   

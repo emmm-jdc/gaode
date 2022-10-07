@@ -5,6 +5,7 @@
   <script>
     import bus from '@/eventBus/eventBus.js'
   import AMapLoader from '@amap/amap-jsapi-loader'
+import { tomato } from 'color-name'
       window._AMapSecurityConfig = {
             securityJsCode: '9f0fdc7fe347d482db8a3cc4e7b6320b'
       }
@@ -47,7 +48,7 @@
         AMapLoader.load({
           key: 'da24dfc6ed8d4233dcddcd5ba8026a0e', // 申请好的Web端开发者Key，首次调用 load 时必填
           version: '2.0', // 指定要加载的 JSAPI 的版本，缺省时默认为 1.4.15
-          plugins: ['AMap.ToolBar', 'AMap.Scale', 'AMap.HawkEye', 'AMap.MapType', 'AMap.Geolocation,','AMap.AutoComplete','AMap.PlaceSearch'] // 需要使用的的插件列表，如比例尺'AMap.Scale'等
+          plugins: ['AMap.ToolBar', 'AMap.Scale', 'AMap.HawkEye', 'AMap.MapType', 'AMap.Geolocation,','AMap.AutoComplete','AMap.PlaceSearch','AMap.Geocoder'] // 需要使用的的插件列表，如比例尺'AMap.Scale'等
         })
           .then(AMap => {
             this.map = new AMap.Map('container', {
@@ -66,6 +67,69 @@
             map: this.map
           }) //构造地点查询类
           this.auto.on('select', this.select)
+          // t添加固定点标记
+          let marker1 = new AMap.Marker({
+            position: new AMap.LngLat(104.154434,30.681506),   // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
+            title: '成都理工东苑'
+          })
+           // 将创建的点标记添加到已有的地图实例：
+           this.map.add(marker1)
+
+           // 创建 AMap.Icon 实例：
+          var icon = new AMap.Icon({
+              size: new AMap.Size(40, 50),    // 图标尺寸
+              image: require('@/images/marker.png'),  // Icon的图像
+              imageOffset: new AMap.Pixel(0, 0),  // 图像相对展示区域的偏移量，适于雪碧图等
+              imageSize: new AMap.Size(40, 50)   // 根据所设置的大小拉伸或压缩图片
+          });
+          // 将 Icon 实例添加到 marker 上:
+          var defineMarker = new AMap.Marker({
+              position:  new AMap.LngLat(104.154434,30.681507),
+              // offset: new AMap.Pixel(-10, -10),
+              icon: icon, // 添加 Icon 实例
+              title: '理工东苑',
+              zoom: 13
+          });
+
+          //  // 自定义标记点
+          //  let defineMarker = new AMap.Marker({
+          //   position: new AMap.LngLat(104.154434,30.681507),
+          //   offset: new AMap.Pixel(-10, -10),
+          //   icon: icon, // 添加 Icon 图标 URL
+          //   title: '理工东苑'
+          //   });
+            this.map.add(defineMarker)
+
+            // 圆点标记示例
+            let circleMarker1 = new AMap.CircleMarker({
+              map:this.map,
+              zindex:10,
+              center:new AMap.LngLat(104.154434,30.681507),
+              radius:10000000,
+              strokeColor:'#cfc',
+              strokeOpacity:.8,
+              strokeWeight:1,
+              fillColor: '#cfc',
+              fillOpacity:.5,
+
+            })
+            circleMarker1.setMap(this.map)
+
+            // 
+            AMap.plugin('AMap.Geocoder', function() {
+            var geocoder = new AMap.Geocoder({
+              // city 指定进行编码查询的城市，支持传入城市名、adcode 和 citycode
+              city: '全国'
+            })
+
+            // 使用geocoder做地理/逆地理编码
+          })
+
+          this.map.on('click',(e)=>{
+            let lat = e.lnglat.lat
+            let lng = e.lnglat.lng
+            this.getLngLatServeice(lat,lng)
+          })
           })
           .catch(e => {
             console.log(e)
@@ -206,6 +270,45 @@
         this.heatmap.show()
       })
     },
+    //   逆向地理编码
+    getLngLatServeice(lat,lng){
+      let pos = [lng,lat]
+      let lnglat = new AMap.LngLat(lng,lat)
+      let geocoder = new AMap.Geocoder({
+        city: ' 全国',
+      })
+      //1 点击地理任意为位置生成一个marker
+      let icon = new AMap.Icon({
+              size: new AMap.Size(40, 50),    // 图标尺寸
+              image: require('@/images/marker.png'),  // Icon的图像
+              imageOffset: new AMap.Pixel(0, 0),  // 图像相对展示区域的偏移量，适于雪碧图等
+              imageSize: new AMap.Size(40, 50)   // 根据所设置的大小拉伸或压缩图片
+          });
+      let marker = new AMap.Marker({
+        position:  new AMap.LngLat(lng,lat),
+        icon: icon, // 添加 Icon 实例
+      })
+      this.map.add(marker)
+      //2 将位置转化为坐标
+      //3 根据地理信息（地址） 进行搜索获取详情信息
+      let address  = ''
+      geocoder.getAddress(lnglat, function(status, result) {
+            if (status === 'complete'&&result.regeocode) {
+                address= result.regeocode.formattedAddress;
+                console.log(address);
+                let res = {
+                    pos:pos,
+                    address:address
+                  }
+                  console.log(res);
+                //需求 固定窗体信息进行展示
+                bus.$emit('shareAddressDetail',res)
+            }else{
+                log.error('根据经纬度查询地址失败')
+            }
+        });
+        
+    }
 
     },
     mounted() {

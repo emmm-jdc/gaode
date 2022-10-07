@@ -1,7 +1,7 @@
 <template>
     <div id="search_container">
         <el-input class="search_input" type="text" placeholder='请速入你要查找的位置' v-model='inputObject.userInput' :id="inputObject.inputId" ></el-input>
-        <button id="searchBtn" @click="send">search</button>
+        <el-button id="searchBtn" type="primary" @click="send">search</el-button>
     </div>
 </template>
 <script>
@@ -42,6 +42,6 @@
     #searchBtn{
         height: 35px;
         width: 120px;
-        background-color: red;
+        /* background-color: red; */
     }
 </style>
